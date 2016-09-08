@@ -1,0 +1,13 @@
+README
+
+###Pre requisites
+
+    sudo apt-get install ruby2.3-dev build-essential libsqlite3-dev
+
+###Install bundler
+
+    gem install bundler
+
+###Install required gems
+
+    bundle install
