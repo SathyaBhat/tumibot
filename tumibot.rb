@@ -35,7 +35,6 @@ def reply_to_message(message_id, group_id, text, token)
   }
   $log.debug("Posting #{text} to #{group_id}")
   response = HTTParty.post("https://api.telegram.org/bot#{token}/sendMessage",options)
-  $log.debug response
 end
 
 def write_offset_to_file(last_offset)
@@ -50,7 +49,6 @@ last_posted_time = Time.now.to_i
 while true
   begin
     response = HTTParty.get("https://api.telegram.org/bot#{token}/getUpdates?offset=#{last_offset+1}")
-    $log.debug("Response: #{response}")
   rescue Net::OpenTimeout => e
       $log.debug e.message  
       $log.debug e.backtrace.inspect
@@ -72,7 +70,7 @@ while true
       chats.from_id         = r['message']['from']['id']
       chats.from_first_name = r['message']['from']['first_name']
       chats.from_last_name  = r['message']['from']['last_name']
-      chats.from_username   = r['message']['from']['username']
+      chats.from_username   = r['message']['from']['username'].downcase
       chats.group_title     = r['message']['chat']['title']
       chats.group_id        = r['message']['chat']['id']
       chats.chat_text       = r['message']['text']
