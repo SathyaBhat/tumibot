@@ -8,7 +8,7 @@ version = '0.0.2'
 start_message = "Don't be a lolgor. Can't you see it's running?"
 stop_message  = "This is like lolkid trying to stop something he can't"
 
-$log          = Logger.new(STDOUT)
+$log          = Logger.new('log/tumibot.log')
 token         = YAML.load_file('config/secrets.yaml')["tumibot"]["token"]
 last_offset   = YAML.load_file('config/offset.yaml')['offset']
 confidence    = YAML.load_file('config/user_confidence_levels.yaml')
@@ -96,9 +96,9 @@ while true
         reply_to_message(chats.message_id, chats.group_id, version, token)
       elsif chats.chat_text =~ /\/start/
         reply_to_message(chats.message_id, chats.group_id, start_message, token)
-      elsif chats.chat_text =~ /expect/
+      elsif chats.chat_text =~ /expect/i
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token)
-      elsif chats.chat_text =~ /posh/
+      elsif chats.chat_text =~ /posh/i
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token)
       elsif chats.chat_text =~ /\/stop/
         reply_to_message(chats.message_id, chats.group_id, stop_message, token)
