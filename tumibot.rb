@@ -96,6 +96,8 @@ while true
         reply_to_message(chats.message_id, chats.group_id, version, token)
       elsif chats.chat_text =~ /\/start/
         reply_to_message(chats.message_id, chats.group_id, start_message, token)
+      elsif chats.chat_text =~ /expect/
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token)
       elsif chats.chat_text =~ /\/stop/
         reply_to_message(chats.message_id, chats.group_id, stop_message, token)
       else
