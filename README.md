@@ -7,11 +7,15 @@ Tumibot - Telegram bot which replies with 'catchphrases' at random times. Hilari
 ###Steps to get it up and running 
 
  - Install bundler
- - 
+
         gem install bundler
 
  - Install required gems
- - 
+ 
         bundle install
+
+ - Run the db-setup module
+  
+        ruby db-setup.rb
 
  - Modify yaml files and replace with your tokens and chats/confidence levels.
