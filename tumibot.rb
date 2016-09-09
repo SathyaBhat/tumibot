@@ -98,6 +98,8 @@ while true
         reply_to_message(chats.message_id, chats.group_id, start_message, token)
       elsif chats.chat_text =~ /expect/
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token)
+      elsif chats.chat_text =~ /posh/
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token)
       elsif chats.chat_text =~ /\/stop/
         reply_to_message(chats.message_id, chats.group_id, stop_message, token)
       else
@@ -114,4 +116,5 @@ while true
       last_offset = chats.update_id
     end
   end
+  sleep 4
 end
