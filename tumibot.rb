@@ -4,6 +4,9 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/update'
 
+version = '0.0.1'
+start_message = "Don't be a lolgor. Can't you see it's running?"
+stop_message = "This is like lolkid trying to stop something he can't"
 $log = Logger.new(STDOUT)  
 token = YAML.load_file('config/secrets.yaml')["tumibot"]["token"]
 last_offset = YAML.load_file('config/offset.yaml')['offset']
@@ -37,15 +40,19 @@ end
 def write_offset_to_file(last_offset)
   data = {}
   data['offset'] = last_offset
-  File.write('offset.yaml', YAML.dump(data))
+  File.write('config/offset.yaml', YAML.dump(data))
   $log.debug("offset at: #{last_offset}, wrote to file")
 end
 
+last_posted_time = Time.now.to_i
+
 while true
+  $log.debug("Offset: #{last_offset}")
   response = HTTParty.get("https://api.telegram.org/bot#{token}/getUpdates?offset=#{last_offset+1}")
   $log.debug("Response: #{response}")
   if response['ok']
     result = response['result']
+    interval = 60*rand(1..5)
     result.each do |r|
       chats = Update.new
       chats.update_id = r['update_id']
@@ -76,12 +83,26 @@ while true
         $log.debug("Warning: Unique constraint error raised on #{chats.update_id}")
       end
 
-      if bot_should_post(chats, confidence) and r['message']['new_chat_participant'].nil? and r['message']['left_chat_participant'].nil?
-        what_to_post = confidence.fetch(chats.from_username).fetch('chats', nil)
-        reply_to_message(chats.message_id, chats.group_id, what_to_post.sample, token) if not what_to_post.nil?
-      end
+      
 
-      write_offset_to_file(chats.update_id)
+      if chats.chat_text =~ /version/
+        reply_to_message(chats.message_id, chats.group_id, version, token)
+      elsif chats.chat_text =~ /\/start/
+        reply_to_message(chats.message_id, chats.group_id, start_message, token)
+      elsif chats.chat_text =~ /\/stop/
+        reply_to_message(chats.message_id, chats.group_id, stop_message, token)
+      else
+        $log.debug("Won't post before till #{interval + last_posted_time}, current time: #{Time.now.to_i}. Interval: #{interval} Last posted time: #{last_posted_time}")
+        if Time.now.to_i >  interval + last_posted_time
+          if bot_should_post(chats, confidence) and r['message']['new_chat_participant'].nil? and r['message']['left_chat_participant'].nil?
+            what_to_post = confidence.fetch(chats.from_username).fetch('chats', nil)
+            reply_to_message(chats.message_id, chats.group_id, what_to_post.sample, token) if not what_to_post.nil?
+            last_posted_time = Time.now.to_i
+          end
+        end
+      end
+      write_offset_to_file(chats.update_id) 
+      last_offset = chats.update_id
     end
   end
 end
