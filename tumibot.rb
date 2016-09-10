@@ -4,7 +4,7 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/update'
 
-version = '0.0.2'
+version = '0.0.3'
 start_message = "Don't be a lolgor. Can't you see it's running?"
 stop_message  = "This is like lolkid trying to stop something he can't"
 
@@ -90,7 +90,7 @@ while true
       end
       
 
-      if chats.chat_text    =~ /version/
+      if chats.chat_text.include('/version') || chats.chat_text.include('/version@tumi_bot')
         reply_to_message(chats.message_id, chats.group_id, version, token)
       elsif chats.chat_text =~ /\/start/
         reply_to_message(chats.message_id, chats.group_id, start_message, token)
@@ -98,6 +98,8 @@ while true
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token)
       elsif chats.chat_text =~ /posh/i
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token)
+      elsif chats.chat_text =~ /watch/i
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('watch').fetch('chats', nil).sample, token)
       elsif chats.chat_text =~ /\/stop/
         reply_to_message(chats.message_id, chats.group_id, stop_message, token)
       else
