@@ -25,8 +25,10 @@ Tumibot - Telegram bot which replies with 'catchphrases' at random times. Hilari
  - Configure the bot:
    
    Copy the `yaml.example` files to `.yaml` and modify `secrets.yaml` to add the Telegram bot token. Change the `user_confidence_levels.yaml` by updating the username, weight and responses the bot must send.
-  
- if you'd like to work further on the bot, there's a Vagrant file which you can customize before you bring it up with 
+ 
+###Bot dev 
+
+If you'd like to work further on the bot, there's a Vagrant file which you can customize before you bring it up with 
 
     vagrant up
     vagrant ssh
