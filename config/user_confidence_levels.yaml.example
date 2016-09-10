@@ -1,6 +1,6 @@
-user1:
-  - level: .50
-  - chats: ['text1', 'text2']
-user2:
+username1:
+  level: .50
+  chats: ['message 1', 'message 2']
+username1:
   level: .35
-  chats: ['text 3', 'text 4']
+  chats: ['message 3', 'message 4']
