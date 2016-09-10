@@ -15,6 +15,7 @@ Tumibot - Telegram bot which replies with 'catchphrases' at random times. Hilari
         bundle install
 
  - Create the db folder
+ 
         mkdir db/
 
  - Run the db-setup module
