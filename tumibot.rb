@@ -90,7 +90,7 @@ while true
       end
       
 
-      if chats.chat_text.include?('/version') || chats.chat_text.include?('/version@tumi_bot')
+      if chats.chat_text == '/version' || chats.chat_text == '/version@tumi_bot'
         reply_to_message(chats.message_id, chats.group_id, version, token)
       elsif chats.chat_text =~ /\/start/
         reply_to_message(chats.message_id, chats.group_id, start_message, token)
