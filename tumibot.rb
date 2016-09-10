@@ -5,8 +5,11 @@ require 'sequel'
 require_relative 'lib/update'
 
 version = '0.0.3'
+
 start_message = "Don't be a lolgor. Can't you see it's running?"
 stop_message  = "This is like lolkid trying to stop something he can't"
+permitted     = "This is done. Ytar bless you."
+not_permitted = "Sorry bub, this ain't happening."
 
 $log          = Logger.new('log/tumibot.log')
 token         = YAML.load_file('config/secrets.yaml')["tumibot"]["token"]
@@ -43,6 +46,11 @@ def write_offset_to_file(last_offset)
   File.write('config/offset.yaml', YAML.dump(data))
   $log.debug("offset at: #{last_offset}, wrote to file")
 end
+
+def reload_confidence()
+  return YAML.load_file('config/user_confidence_levels.yaml')
+end
+
 
 last_posted_time = Time.now.to_i
 
@@ -92,6 +100,14 @@ while true
 
       if chats.chat_text == '/version' || chats.chat_text == '/version@tumi_bot'
         reply_to_message(chats.message_id, chats.group_id, version, token)
+      elsif chats.chat_text == '/reload' || chats.chat_text == '/reload@tumi_bot'
+        if chats.from_username == 'sathyabhat'
+          #todo: change this to check for admin and apply accordingly
+          confidence = reload_confidence()
+          reply_to_message(chats.message_id, chats.group_id, permitted, token)
+        else
+          reply_to_message(chats.message_id, chats.group_id, not_permitted, token)
+        end
       elsif chats.chat_text =~ /\/start/
         reply_to_message(chats.message_id, chats.group_id, start_message, token)
       elsif chats.chat_text =~ /expect/i
