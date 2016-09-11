@@ -4,7 +4,7 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/update'
 
-version = '0.1.0'
+version = '0.1.1
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
@@ -136,7 +136,7 @@ while true
       else
         $log.debug("Won't post before till #{interval + last_posted_time}, current time: #{Time.now.to_i}. Interval: #{interval} Last posted time: #{last_posted_time}")
         if Time.now.to_i >  interval + last_posted_time
-          if bot_should_post(chats, confidence) and r['message']['new_chat_participant'].nil? and r['message']['left_chat_participant'].nil?
+          if bot_should_post(chats.from_username, confidence) and r['message']['new_chat_participant'].nil? and r['message']['left_chat_participant'].nil?
             what_to_post     = confidence.fetch(chats.from_username).fetch('chats', nil)
             reply_to_message(chats.message_id, chats.group_id, what_to_post.sample, token) if not what_to_post.nil?
             last_posted_time = Time.now.to_i
