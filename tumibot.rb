@@ -4,26 +4,28 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/update'
 
-version = '0.0.6'
+version = '0.1.0'
 
-start_message = "Don't be a lolgor. Can't you see it's running?"
-stop_message  = "This is like lolkid trying to stop something he can't"
-permitted     = "This is done. Ytar bless you."
-not_permitted = "Sorry bub, this ain't happening."
+start_message     = "Don't be a lolgor. Can't you see it's running?"
+stop_message      = "This is like lolkid trying to stop something he can't"
+permitted         = "This is done. Ytar bless you."
+not_permitted     = "Sorry bub, this ain't happening."
+min_wait_interval = 3
+max_wait_interval = 10
 
 $log          = Logger.new('log/tumibot.log')
 token         = YAML.load_file('config/secrets.yaml')["tumibot"]["token"]
 last_offset   = YAML.load_file('config/offset.yaml')['offset']
 confidence    = YAML.load_file('config/user_confidence_levels.yaml')
 
-def bot_should_post(chats, confidence)  
-  if confidence.fetch(chats.from_username, nil).nil?
-    $log.info("#{chats.from_username} info not found")
+def bot_should_post(username, confidence)  
+  if confidence.fetch(username, nil).nil?
+    $log.info("#{username} info not found")
     return false
   end
 
-  if rand() > confidence[chats.from_username]['level']
-     $log.info("#{chats.from_username} exceeded confidence level #{confidence[chats.from_username]['level']}")
+  if rand() > confidence[username]['level']
+     $log.info("#{username} exceeded confidence level #{confidence[username]['level']}")
      return true
   end
 end
@@ -48,9 +50,14 @@ def write_offset_to_file(last_offset)
 end
 
 def reload_confidence()
+  $log.info('Confidence levels reloaded')
   return YAML.load_file('config/user_confidence_levels.yaml')
 end
 
+#todo: implement interval updation
+def update_interval()
+  nil
+end
 
 last_posted_time = Time.now.to_i
 
@@ -65,7 +72,7 @@ while true
 
   if response['ok']
     result = response['result']
-    interval = 60*rand(1..5)
+    interval = 60*rand(min_wait_interval.to_i..max_wait_interval.to_i)
     result.each do |r|
       chats = Update.new
       chats.update_id = r['update_id']
@@ -108,16 +115,24 @@ while true
         else
           reply_to_message(chats.message_id, chats.group_id, not_permitted, token)
         end
+      elsif chats.chat_text == '/min_wait_interval' || chats.chat_text == '/min_wait_interval@tumi_bot'
+        if chats.from_username == 'sathyabhat'
+          #todo: change this to check for admin and apply accordingly
+          #interval = update_interval(interval)
+          reply_to_message(chats.message_id, chats.group_id, 'Coming soon', token)
+        else
+          reply_to_message(chats.message_id, chats.group_id, not_permitted, token)
+        end
       elsif chats.chat_text =~ /\/start/
         reply_to_message(chats.message_id, chats.group_id, start_message, token)
-      elsif chats.chat_text =~ /expect/i
-        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token)
-      elsif chats.chat_text =~ /posh/i
-        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token)
-      elsif chats.chat_text =~ /watch/i
-        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('watch').fetch('chats', nil).sample, token)
       elsif chats.chat_text =~ /\/stop/
         reply_to_message(chats.message_id, chats.group_id, stop_message, token)
+      elsif chats.chat_text =~ /expect/i
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token) if bot_should_post('expect', confidence)
+      elsif chats.chat_text =~ /posh/i 
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token)  if bot_should_post('posh', confidence)
+      elsif chats.chat_text =~ /watch/i
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('watch').fetch('chats', nil).sample, token) if bot_should_post('watch', confidence)
       else
         $log.debug("Won't post before till #{interval + last_posted_time}, current time: #{Time.now.to_i}. Interval: #{interval} Last posted time: #{last_posted_time}")
         if Time.now.to_i >  interval + last_posted_time

@@ -1,2 +1,4 @@
 .vagrant/
 *.db
+*.yaml
+log/
