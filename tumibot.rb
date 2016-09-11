@@ -4,7 +4,7 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/update'
 
-version = '0.1.1
+version = '0.1.1'
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
