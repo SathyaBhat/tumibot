@@ -129,7 +129,7 @@ while true
         reply_to_message(chats.message_id, chats.group_id, stop_message, token)
       elsif chats.chat_text =~ /expect/i
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token) if bot_should_post('expect', confidence)
-      elsif chats.chat_text =~ /posh/i  ||  chats.chat_text =~ /buy/i ||  chats.chat_text =~ /bought/i ||  chats.chat_text =~ /mac/i
+      elsif chats.chat_text =~ /posh/i  ||  chats.chat_text =~ /buy/i ||  chats.chat_text =~ /bought/i ||  chats.chat_text =~ /mac/i || chats.chat_text =~ /fender/i || chats.chat_text =~ /blackstar/i || chats.chat_text =~ /iphone/i
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token)  if bot_should_post('posh', confidence)
       elsif chats.chat_text =~ /watch/i
         reply_to_message(chats.message_id, chats.group_id, confidence.fetch('watch').fetch('chats', nil).sample, token) if bot_should_post('watch', confidence)
