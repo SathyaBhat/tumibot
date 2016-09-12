@@ -4,14 +4,14 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/update'
 
-version = '0.1.1'
+version = '0.1.2'
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
 permitted         = "This is done. Ytar bless you."
 not_permitted     = "Sorry bub, this ain't happening."
 min_wait_interval = 3
-max_wait_interval = 10
+max_wait_interval = 6
 
 $log          = Logger.new('log/tumibot.log')
 token         = YAML.load_file('config/secrets.yaml')["tumibot"]["token"]
