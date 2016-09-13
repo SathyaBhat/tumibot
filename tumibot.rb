@@ -2,9 +2,9 @@ require 'httparty'
 require 'yaml'
 require 'logger'
 require 'sequel'
-require_relative 'lib/update'
+require_relative 'lib/models'
 
-version = '0.1.2'
+version = '0.1.3'
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
@@ -40,6 +40,23 @@ def reply_to_message(message_id, group_id, text, token)
   }
   $log.debug("Posting #{text} to #{group_id}")
   response = HTTParty.post("https://api.telegram.org/bot#{token}/sendMessage",options)
+  
+  if response['ok']
+    result = response['result']
+    save_messages(result['message_id'], text, group_id)
+  end
+end
+
+
+def save_messages(message_id, chat_text, sent_to_group)  
+  sent_messages               = Sent_Message.new
+  sent_messages.message_id    = message_id
+  sent_messages.chat_text     = chat_text
+  sent_messages.sent_to_group = sent_to_group
+  sent_messages.sent_at       = Time.now
+  sent_messages.save
+  $log.debug("Message id #{message_id} saved")
+  $log.info("Saved to sent_messages table")
 end
 
 def write_offset_to_file(last_offset)

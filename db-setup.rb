@@ -24,6 +24,7 @@ def set_up_tables(db)
             primary_key :id
             Integer :message_id
             String :chat_text
+            String :sent_to_group
             Date :sent_at
         end
     rescue Sequel::Error => e
