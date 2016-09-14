@@ -4,14 +4,14 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/models'
 
-version = '0.1.3'
+version = '0.1.4'
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
 permitted         = "This is done. Ytar bless you."
 not_permitted     = "Sorry bub, this ain't happening."
 min_wait_interval = 3
-max_wait_interval = 6
+max_wait_interval = 10
 
 $log          = Logger.new('log/tumibot.log')
 token         = YAML.load_file('config/secrets.yaml')["tumibot"]["token"]
@@ -30,30 +30,31 @@ def bot_should_post(username, confidence)
   end
 end
 
-def reply_to_message(message_id, group_id, text, token)
+def reply_to_message(message_id, group_id, message_to_send, token, reply_to_message)
   options = {
     body: {
       chat_id: group_id,
-      text: text,
+      text: message_to_send,
       reply_to_message_id: message_id
     }
   }
-  $log.debug("Posting #{text} to #{group_id}")
+  $log.debug("Posting #{message_to_send} to #{group_id}")
   response = HTTParty.post("https://api.telegram.org/bot#{token}/sendMessage",options)
   
   if response['ok']
     result = response['result']
-    save_messages(result['message_id'], text, group_id)
+    save_messages(result['message_id'], message_to_send, group_id, reply_to_message)
   end
 end
 
 
-def save_messages(message_id, chat_text, sent_to_group)  
-  sent_messages               = Sent_Message.new
-  sent_messages.message_id    = message_id
-  sent_messages.chat_text     = chat_text
-  sent_messages.sent_to_group = sent_to_group
-  sent_messages.sent_at       = Time.now
+def save_messages(message_id, chat_text, sent_to_group, reply_to_message)  
+  sent_messages                  = Sent_Message.new
+  sent_messages.message_id       = message_id
+  sent_messages.chat_text        = chat_text
+  sent_messages.sent_to_group    = sent_to_group
+  sent_messages.reply_to_message = reply_to_message
+  sent_messages.sent_at          = Time.now
   sent_messages.save
   $log.debug("Message id #{message_id} saved")
   $log.info("Saved to sent_messages table")
@@ -106,6 +107,7 @@ while true
       chats.group_title     = r['message']['chat']['title']
       chats.group_id        = r['message']['chat']['id']
       chats.chat_text       = r['message']['text']
+      reply_to_message      = r['message']['text']
 
       if r['message']['forward_from'].nil?
         chats.chat_received_date = r['message']['date']
@@ -123,39 +125,39 @@ while true
       
 
       if chats.chat_text == '/version' || chats.chat_text == '/version@tumi_bot'
-        reply_to_message(chats.message_id, chats.group_id, version, token)
+        reply_to_message(chats.message_id, chats.group_id, version, token, reply_to_message)
       elsif chats.chat_text == '/reload' || chats.chat_text == '/reload@tumi_bot'
         if chats.from_username == 'sathyabhat'
           #todo: change this to check for admin and apply accordingly
           confidence = reload_confidence()
-          reply_to_message(chats.message_id, chats.group_id, permitted, token)
+          reply_to_message(chats.message_id, chats.group_id, permitted, token, reply_to_message)
         else
-          reply_to_message(chats.message_id, chats.group_id, not_permitted, token)
+          reply_to_message(chats.message_id, chats.group_id, not_permitted, token, reply_to_message)
         end
       elsif chats.chat_text == '/min_wait_interval' || chats.chat_text == '/min_wait_interval@tumi_bot'
         if chats.from_username == 'sathyabhat'
           #todo: change this to check for admin and apply accordingly
           #interval = update_interval(interval)
-          reply_to_message(chats.message_id, chats.group_id, 'Coming soon', token)
+          reply_to_message(chats.message_id, chats.group_id, 'Coming soon', token, reply_to_message)
         else
-          reply_to_message(chats.message_id, chats.group_id, not_permitted, token)
+          reply_to_message(chats.message_id, chats.group_id, not_permitted, token, reply_to_message)
         end
       elsif chats.chat_text =~ /\/start/
-        reply_to_message(chats.message_id, chats.group_id, start_message, token)
+        reply_to_message(chats.message_id, chats.group_id, start_message, token, reply_to_message)
       elsif chats.chat_text =~ /\/stop/
-        reply_to_message(chats.message_id, chats.group_id, stop_message, token)
+        reply_to_message(chats.message_id, chats.group_id, stop_message, token, reply_to_message)
       elsif chats.chat_text =~ /expect/i
-        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token) if bot_should_post('expect', confidence)
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('expect').fetch('chats', nil).sample, token, reply_to_message) if bot_should_post('expect', confidence)
       elsif chats.chat_text =~ /posh/i  ||  chats.chat_text =~ /buy/i ||  chats.chat_text =~ /bought/i ||  chats.chat_text =~ /mac/i || chats.chat_text =~ /fender/i || chats.chat_text =~ /blackstar/i || chats.chat_text =~ /iphone/i
-        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token)  if bot_should_post('posh', confidence)
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('posh').fetch('chats', nil).sample, token, reply_to_message)  if bot_should_post('posh', confidence)
       elsif chats.chat_text =~ /watch/i
-        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('watch').fetch('chats', nil).sample, token) if bot_should_post('watch', confidence)
+        reply_to_message(chats.message_id, chats.group_id, confidence.fetch('watch').fetch('chats', nil).sample, token, reply_to_message) if bot_should_post('watch', confidence)
       else
         $log.debug("Won't post before till #{interval + last_posted_time}, current time: #{Time.now.to_i}. Interval: #{interval} Last posted time: #{last_posted_time}")
         if Time.now.to_i >  interval + last_posted_time
           if bot_should_post(chats.from_username, confidence) and r['message']['new_chat_participant'].nil? and r['message']['left_chat_participant'].nil?
             what_to_post     = confidence.fetch(chats.from_username).fetch('chats', nil)
-            reply_to_message(chats.message_id, chats.group_id, what_to_post.sample, token) if not what_to_post.nil?
+            reply_to_message(chats.message_id, chats.group_id, what_to_post.sample, token, reply_to_message) if not what_to_post.nil?
             last_posted_time = Time.now.to_i
           end
         end
