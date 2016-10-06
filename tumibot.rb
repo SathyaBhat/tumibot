@@ -4,13 +4,14 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/models'
 
-version = '0.1.4'
+version = '0.1.6'
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
 permitted         = "This is done. Ytar bless you."
 not_permitted     = "Sorry bub, this ain't happening."
-min_wait_interval = 3
+admin_user_id     = 0
+min_wait_interval = 4
 max_wait_interval = 10
 
 $log          = Logger.new('log/tumibot.log')
@@ -85,7 +86,18 @@ while true
   rescue Net::OpenTimeout => e
       $log.debug e.message  
       $log.debug e.backtrace.inspect
-      sleep 60
+      sleep 300
+      reply_to_message(0, admin_user_id, "#{e.message} \n #{e.backtrace.inspect}" , token, 0)
+  rescue Errno::ECONNRESET => e
+      $log.debug e.message
+      $log.debug e.backtrace.inspect
+      sleep 300
+      reply_to_message(0, admin_user_id, "#{e.message} \n #{e.backtrace.inspect}" , token, 0)
+  rescue Exception => e
+      $log.debug e.message
+      $log.debug e.backtrace.inspect
+      sleep 300
+      reply_to_message(0, admin_user_id, "#{e.message} \n #{e.backtrace.inspect}" , token, 0)
   end
 
   if response['ok']
@@ -166,5 +178,5 @@ while true
       last_offset = chats.update_id
     end
   end
-  sleep 4
+  sleep 2
 end
