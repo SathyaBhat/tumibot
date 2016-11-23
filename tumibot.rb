@@ -4,15 +4,17 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/models'
 
-version = '0.1.6'
+version = '0.1.7'
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
 permitted         = "This is done. Ytar bless you."
 not_permitted     = "Sorry bub, this ain't happening."
+theek_hain        = "Haan ji theek hain"
 admin_user_id     = 0
 min_wait_interval = 4
 max_wait_interval = 10
+$no_more_bak_bak  = false
 
 $log          = Logger.new('log/tumibot.log')
 token         = YAML.load_file('config/secrets.yaml')["tumibot"]["token"]
@@ -40,11 +42,13 @@ def reply_to_message(message_id, group_id, message_to_send, token, reply_to_mess
     }
   }
   $log.debug("Posting #{message_to_send} to #{group_id}")
-  response = HTTParty.post("https://api.telegram.org/bot#{token}/sendMessage",options)
+  if not $no_more_bak_bak 
+    response = HTTParty.post("https://api.telegram.org/bot#{token}/sendMessage",options)
   
-  if response['ok']
-    result = response['result']
-    save_messages(result['message_id'], message_to_send, group_id, reply_to_message)
+    if response['ok']
+      result = response['result']
+      save_messages(result['message_id'], message_to_send, group_id, reply_to_message)
+    end
   end
 end
 
@@ -143,6 +147,22 @@ while true
           #todo: change this to check for admin and apply accordingly
           confidence = reload_confidence()
           reply_to_message(chats.message_id, chats.group_id, permitted, token, reply_to_message)
+        else
+          reply_to_message(chats.message_id, chats.group_id, not_permitted, token, reply_to_message)
+        end
+      elsif chats.chat_text == '/chup' || chats.chat_text == '/chup@tumi_bot'
+        if chats.from_username == 'sathyabhat'
+          #todo: change this to check for admin and apply accordingly
+          reply_to_message(chats.message_id, chats.group_id, theek_hain, token, reply_to_message)
+          $no_more_bak_bak = true
+        else
+          reply_to_message(chats.message_id, chats.group_id, not_permitted, token, reply_to_message)
+        end
+      elsif chats.chat_text == '/bol' || chats.chat_text == '/bol@tumi_bot'
+        if chats.from_username == 'sathyabhat'
+          #todo: change this to check for admin and apply accordingly
+          reply_to_message(chats.message_id, chats.group_id, theek_hain, token, reply_to_message)
+          $no_more_bak_bak = false
         else
           reply_to_message(chats.message_id, chats.group_id, not_permitted, token, reply_to_message)
         end

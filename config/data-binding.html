@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html ng-app="notesApp">
+<head>
+<title> Data-Binding</title>title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+<script type = "test/javascript">
+angular.module('notesApp', [])
+.controller('MainCtrl', function($scope){
+$scope.name = "Hello World";
+});
+</script>
+</head>
+<body ng-controller="MainCtrl">
+<h2> {{name}}</h2>
+</body>
+</html>
