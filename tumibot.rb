@@ -161,8 +161,8 @@ while true
       elsif chats.chat_text == '/bol' || chats.chat_text == '/bol@tumi_bot'
         if chats.from_username == 'sathyabhat'
           #todo: change this to check for admin and apply accordingly
-          reply_to_message(chats.message_id, chats.group_id, theek_hain, token, reply_to_message)
           $no_more_bak_bak = false
+          reply_to_message(chats.message_id, chats.group_id, theek_hain, token, reply_to_message)
         else
           reply_to_message(chats.message_id, chats.group_id, not_permitted, token, reply_to_message)
         end
