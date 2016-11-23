@@ -4,7 +4,7 @@ require 'logger'
 require 'sequel'
 require_relative 'lib/models'
 
-version = '0.1.7'
+version = '0.1.8'
 
 start_message     = "Don't be a lolgor. Can't you see it's running?"
 stop_message      = "This is like lolkid trying to stop something he can't"
